@@ -6,7 +6,8 @@
 (defvar hkc-mode-map
   (let ((map (make-sparse-keymap)))
     
-    (define-key map "\C-ca" 'ask-tagname)
+    (define-key map "\C-ct" 'quote-line-by)
+    (define-key map "\M-t" 'quote-region-by)
 
     map)
   "The keymap of html-key-chord-mode.")
@@ -33,46 +34,100 @@
 	(t
 	 (message "HTML Key Chord mode off"))))
 
-;; 受けとったタグでくくる関数
-(defun quote-line-by-tag (tag)
+
+;; 行をタグでくくる関数の対話版
+(defun quote-line-by (tag)
+  "現在カーソルのある行をミニバッファに入力したタグで囲います。"
+  (interactive "*sTag: ") ; s => 文字入力を指示する。
+  (quote-by-tag tag))
+
+;; 行をタグでくくる関数の対話版
+(defun quote-region-by (tag)
+  "リージョンで選択している範囲をミニバッファで入力したタグで囲います。"
+  (interactive "*sTag: ") ; s => 文字入力を指示する。
+  (quote-by-tag tag t))
+
+
+(defun quote-by-tag (tag &optional behavior)
+  "タグを受けとってスタートタグにセットした後、class や id などを除去してエンドタグにセットします。
+そして、行、またはリージョンで囲う関数へタグを渡します。
+behavior に、nil 以外の値を受けとった場合のみ、リージョンで囲う関数を使います。"
+  (setq starttag tag) ; スタートタグはそのままセット
+  (setq endtag (replace-regexp-in-string "\\s .*\$" "" starttag nil nil)) ; エンドダグは class / id を除去
+  ;; string-match と replace-match
+  ;; を使う方法が一番初歩っぽいけど、subr.el に定義されている
+  ;; replace-regexp-in-string を使った方が楽っぽかったので、そうしました。
+
+  ;; behavior が t のときは、リージョンをタグでくくる
+  (cond (behavior
+	 (quote-region-by-tag starttag endtag))
+	(t
+	 (quote-line-by-tag starttag endtag))))
+
+
+(defun quote-region-by-tag (starttag endtag)
+  "受けとったタグで、リージョンを囲います。"
+  (let ((begin (mark))
+        (end (point)))
+    (when (> begin end)
+      (let ((tmp begin))
+        (setq begin end
+              end tmp)))
+    (save-excursion
+      (goto-char end)
+      (insert "</" endtag ">")
+      (goto-char begin)
+      (insert "<" starttag ">"))))
+
+
+(defun quote-line-by-tag (starttag endtag)
+  "受けとったタグで、行を囲います。"
   (save-excursion
     (end-of-line)
-    (insert "</" tag ">")
+    (insert "</" endtag ">")
     (beginning-of-line)
     (skip-white-forward)
-    (insert "<" tag ">")))
+    (insert "<" starttag ">")))
 
-;; debug func
-(defun ask-tagname (quotetag)
-  (interactive "*sTag: ") ; s => 文字入力を指示する。
-  (message quotetag))
 
 ;; 2文字のタグを一気に登録。
-(setq taglist (list
-	       "dl"
-	       "dt"
-	       "dd"
-	       "ol"
-	       "ul"
-	       "li"
-	       "th"
-	       "h1"
-	       "h2"
-	       "h3"
-	       "h4"
-	       "h5"
-	       "h6"
-	       "em"))
-
-(mapc (lambda (tag)
-	(key-chord-define-global tag (lambda () (interactive) (quote-line-by-tag tag)) ))
-      taglist)
+;; 2つ目の lambda 関数の tag までリストが届かない><
+;; (mapc (lambda (tag)
+;; 	(key-chord-define hkc-mode-map tag (lambda () (interactive) (quote-line-by-tag tag)) ))
+;;       (list
+;;        "dl"
+;;        "dt"
+;;        "dd"
+;;        "ol"
+;;        "ul"
+;;        "li"
+;;        "th"
+;;        "h1"
+;;        "h2"
+;;        "h3"
+;;        "h4"
+;;        "h5"
+;;        "h6"
+;;        "em"))
 
 ;; 2文字以外のタグを個別登録
 ;; テンプレート
-;; (key-chord-define hkc-mode-map "2keys" (lambda () (interactive) (quote-line-by-tag "tagname")) )
-(key-chord-define hkc-mode-map "pp" (lambda () (interactive) (quote-line-by-tag "p")) )
-(key-chord-define hkc-mode-map "bq" (lambda () (interactive) (quote-line-by-tag "blockquote")) )
+;; (key-chord-define hkc-mode-map "2keys" (lambda () (interactive) (quote-by-tag "tagname")) )
+(key-chord-define hkc-mode-map "pp" (lambda () (interactive) (quote-by-tag "p")) )
+(key-chord-define hkc-mode-map "bq" (lambda () (interactive) (quote-by-tag "blockquote")) )
+(key-chord-define hkc-mode-map "dl" (lambda () (interactive) (quote-by-tag "dl")) )
+(key-chord-define hkc-mode-map "dt" (lambda () (interactive) (quote-by-tag "dt")) )
+(key-chord-define hkc-mode-map "dd" (lambda () (interactive) (quote-by-tag "dd")) )
+(key-chord-define hkc-mode-map "ul" (lambda () (interactive) (quote-by-tag "ul")) )
+(key-chord-define hkc-mode-map "li" (lambda () (interactive) (quote-by-tag "li")) )
+(key-chord-define hkc-mode-map "ol" (lambda () (interactive) (quote-by-tag "ol")) )
+(key-chord-define hkc-mode-map "h1" (lambda () (interactive) (quote-by-tag "h1")) )
+(key-chord-define hkc-mode-map "h2" (lambda () (interactive) (quote-by-tag "h2")) )
+(key-chord-define hkc-mode-map "h3" (lambda () (interactive) (quote-by-tag "h3")) )
+(key-chord-define hkc-mode-map "h4" (lambda () (interactive) (quote-by-tag "h4")) )
+(key-chord-define hkc-mode-map "h5" (lambda () (interactive) (quote-by-tag "h5")) )
+(key-chord-define hkc-mode-map "h6" (lambda () (interactive) (quote-by-tag "h6")) )
+(key-chord-define hkc-mode-map "em" (lambda () (interactive) (quote-by-tag "em")) )
 
 (provide 'html-key-chord-mode)
 
