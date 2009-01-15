@@ -1,42 +1,7 @@
 ;;; html-key-chord-mode.el --- support html tagging key chord
 ;; -*- coding: utf-8; mode:emacs-lisp -*-
 
-;; Copyright (C) 2008 Tomoya Otake
-;; Author: Tomoya Otake <tomoya.ton@gmail.com>
-
-;; This file is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published
-;; by the Free Software Foundation; either version 2, or (at your
-;; option) any later version.
-
-;; This file is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-;; Boston, MA 02111-1307, USA.
-
-;; * Description
-;;
-;; html-key-chord-mode is minor mode of Emacs that use key-chord.el.
-;; This mode can be coded very quickly.
-;;
-;; * Usage
-;;
-;; Just put the code like below into your .emacs:
-;;
-;; (require 'html-key-chord-mode)
-
-
 (require 'key-chord)
-;; http://www.emacswiki.org/emacs/key-chord.el
-
-(require 'xyzzy)
-;; http://github.com/tomoya/xyzzy.el/tree
-
 (defvar html-key-chord-mode nil) ; mode 変数。これで状態判定
 (defvar hkc-mode-map
   (let ((map (make-sparse-keymap)))
@@ -139,7 +104,6 @@ behavior に、nil 以外の値を受けとった場合のみ、リージョン�
        "ul"
        "li"
        "th"
-       "tr"
        "h1"
        "h2"
        "h3"
