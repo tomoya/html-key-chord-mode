@@ -92,42 +92,45 @@ behavior に、nil 以外の値を受けとった場合のみ、リージョン�
 
 ;; 2文字のタグを一気に登録。
 ;; 2つ目の lambda 関数の tag までリストが届かない><
-;; (mapc (lambda (tag)
-;; 	(key-chord-define hkc-mode-map tag (lambda () (interactive) (quote-line-by-tag tag)) ))
-;;       (list
-;;        "dl"
-;;        "dt"
-;;        "dd"
-;;        "ol"
-;;        "ul"
-;;        "li"
-;;        "th"
-;;        "h1"
-;;        "h2"
-;;        "h3"
-;;        "h4"
-;;        "h5"
-;;        "h6"
-;;        "em"))
+;; 届いてないんじゃなくて、展開されずに渡されてしまっていて、呼び出されたときに、何？状態だったみたい
+;; バッククォート ` とカンマ , を使う事で、変数を渡す前に展開できるんだって! elim++
+(mapc (lambda (tag)
+	(key-chord-define hkc-mode-map tag `(lambda () (interactive) (quote-by-tag ,tag)) ))
+      (list
+       "dl"
+       "dt"
+       "dd"
+       "ol"
+       "ul"
+       "li"
+       "th"
+       "tr"
+       "h1"
+       "h2"
+       "h3"
+       "h4"
+       "h5"
+       "h6"
+       "em"))
 
 ;; 2文字以外のタグを個別登録
 ;; テンプレート
 ;; (key-chord-define hkc-mode-map "2keys" (lambda () (interactive) (quote-by-tag "tagname")) )
 (key-chord-define hkc-mode-map "pp" (lambda () (interactive) (quote-by-tag "p")) )
 (key-chord-define hkc-mode-map "bq" (lambda () (interactive) (quote-by-tag "blockquote")) )
-(key-chord-define hkc-mode-map "dl" (lambda () (interactive) (quote-by-tag "dl")) )
-(key-chord-define hkc-mode-map "dt" (lambda () (interactive) (quote-by-tag "dt")) )
-(key-chord-define hkc-mode-map "dd" (lambda () (interactive) (quote-by-tag "dd")) )
-(key-chord-define hkc-mode-map "ul" (lambda () (interactive) (quote-by-tag "ul")) )
-(key-chord-define hkc-mode-map "li" (lambda () (interactive) (quote-by-tag "li")) )
-(key-chord-define hkc-mode-map "ol" (lambda () (interactive) (quote-by-tag "ol")) )
-(key-chord-define hkc-mode-map "h1" (lambda () (interactive) (quote-by-tag "h1")) )
-(key-chord-define hkc-mode-map "h2" (lambda () (interactive) (quote-by-tag "h2")) )
-(key-chord-define hkc-mode-map "h3" (lambda () (interactive) (quote-by-tag "h3")) )
-(key-chord-define hkc-mode-map "h4" (lambda () (interactive) (quote-by-tag "h4")) )
-(key-chord-define hkc-mode-map "h5" (lambda () (interactive) (quote-by-tag "h5")) )
-(key-chord-define hkc-mode-map "h6" (lambda () (interactive) (quote-by-tag "h6")) )
-(key-chord-define hkc-mode-map "em" (lambda () (interactive) (quote-by-tag "em")) )
+;; (key-chord-define hkc-mode-map "dl" (lambda () (interactive) (quote-by-tag "dl")) )
+;; (key-chord-define hkc-mode-map "dt" (lambda () (interactive) (quote-by-tag "dt")) )
+;; (key-chord-define hkc-mode-map "dd" (lambda () (interactive) (quote-by-tag "dd")) )
+;; (key-chord-define hkc-mode-map "ul" (lambda () (interactive) (quote-by-tag "ul")) )
+;; (key-chord-define hkc-mode-map "li" (lambda () (interactive) (quote-by-tag "li")) )
+;; (key-chord-define hkc-mode-map "ol" (lambda () (interactive) (quote-by-tag "ol")) )
+;; (key-chord-define hkc-mode-map "h1" (lambda () (interactive) (quote-by-tag "h1")) )
+;; (key-chord-define hkc-mode-map "h2" (lambda () (interactive) (quote-by-tag "h2")) )
+;; (key-chord-define hkc-mode-map "h3" (lambda () (interactive) (quote-by-tag "h3")) )
+;; (key-chord-define hkc-mode-map "h4" (lambda () (interactive) (quote-by-tag "h4")) )
+;; (key-chord-define hkc-mode-map "h5" (lambda () (interactive) (quote-by-tag "h5")) )
+;; (key-chord-define hkc-mode-map "h6" (lambda () (interactive) (quote-by-tag "h6")) )
+;; (key-chord-define hkc-mode-map "em" (lambda () (interactive) (quote-by-tag "em")) )
 
 (provide 'html-key-chord-mode)
 
