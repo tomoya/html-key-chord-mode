@@ -30,6 +30,16 @@
 ;;
 ;; (require 'html-key-chord-mode)
 
+;; default keybinds
+;; (define-key map "\C-ct" 'quote-line-by)
+;; (define-key map "\M-t" 'quote-region-by)
+;; (define-key map "\C-cd" 'del-line-tag)
+;; (define-key map "\M-d" 'del-region-tag)
+
+;; If you want to change keybind, input your .emacs
+;; (define-key hkc-mode-map "\C-t" 'quote-line-by)
+
+
 
 (require 'key-chord)
 ;; http://www.emacswiki.org/emacs/key-chord.el
@@ -38,11 +48,18 @@
 ;; http://github.com/tomoya/xyzzy.el/tree
 
 (defvar html-key-chord-mode nil) ; mode 変数。これで状態判定
+
+(defvar hkc-next-line t
+  "マークアップした後、次の行へ進む。
+もし、次の行に進むのが嫌であれば、この変数の値を nil にして下さい。")
+
 (defvar hkc-mode-map
   (let ((map (make-sparse-keymap)))
     
     (define-key map "\C-ct" 'quote-line-by)
     (define-key map "\M-t" 'quote-region-by)
+    (define-key map "\C-cd" 'del-line-tag)
+    (define-key map "\M-d" 'del-region-tag)
 
     map)
   "The keymap of html-key-chord-mode.")
@@ -72,21 +89,21 @@
 
 ;; 行をタグでマークアップする関数のコマンド版
 (defun quote-line-by (tag)
-  "現在カーソルのある行をミニバッファに入力したタグで囲います。"
+  "現在カーソルのある行をミニバッファに入力したタグでマークアップします。"
   (interactive "*sTag: ") ; s => 文字入力を指示する。
   (quote-by-tag tag))
 
 ;; リージョンをタグでマークアップする関数のコマンド版
 (defun quote-region-by (tag)
-  "リージョンで選択している範囲をミニバッファで入力したタグで囲います。"
+  "リージョンで選択している範囲をミニバッファで入力したタグでマークアップします。"
   (interactive "*sTag: ") ; s => 文字入力を指示する。
   (quote-by-tag tag t))
 
 
 (defun quote-by-tag (tag &optional behavior)
   "タグを受けとってスタートタグにセットした後、class や id などを除去してエンドタグにセットします。
-そして、行、またはリージョンで囲う関数へタグを渡します。
-behavior に、nil 以外の値を受けとった場合のみ、リージョンで囲う関数を使います。"
+そして、行、またはリージョンをマークアップする関数へタグを渡します。
+behavior に、nil 以外の値を受けとった場合のみ、リージョンをマークアップする関数を使います。"
   (setq starttag tag) ; スタートタグはそのままセット
   (setq endtag (replace-regexp-in-string "\\s .*\$" "" starttag nil nil)) ; エンドダグは class / id を除去
   ;; string-match と replace-match
@@ -101,7 +118,7 @@ behavior に、nil 以外の値を受けとった場合のみ、リージョン�
 
 
 (defun quote-region-by-tag (starttag endtag)
-  "受けとったタグで、リージョンを囲います。"
+  "受けとったタグで、リージョンをマークアップします。"
   (let ((begin (mark))
         (end (point)))
     (when (> begin end)
@@ -116,13 +133,34 @@ behavior に、nil 以外の値を受けとった場合のみ、リージョン�
 
 
 (defun quote-line-by-tag (starttag endtag)
-  "受けとったタグで、行を囲います。"
+  "受けとったタグで、行をマークアップします。"
   (save-excursion
     (end-of-line)
     (insert "</" endtag ">")
     (beginning-of-line)
     (skip-white-forward)
-    (insert "<" starttag ">")))
+    (insert "<" starttag ">"))
+  (cond (hkc-next-line (next-line))))
+
+
+(defun del-line-tag ()
+  "現在カーソルのある行のタグを全て削除します。"
+  (interactive "*")
+  (save-excursion
+    (save-restriction
+      (narrow-to-region (progn (goto-eol) (point)) (progn (goto-bol) (point)))
+      (goto-char (point-min))
+      (replace-regexp "<[^<]+>" ""))))
+
+
+(defun del-region-tag (start end)
+  "リージョン内にあるタグを全て削除します。"
+  (interactive "r")
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char (point-min))
+      (replace-regexp "<[^<]+>" ""))))
 
 
 ;; 2文字のタグを一気に登録。
@@ -151,7 +189,7 @@ behavior に、nil 以外の値を受けとった場合のみ、リージョン�
 ;; テンプレート
 ;; (key-chord-define hkc-mode-map "2keys" (lambda () (interactive) (quote-by-tag "tagname")) )
 ;; あなたの .emacs などに書いて、自由に追加できます。
-(key-chord-define hkc-mode-map "pp" (lambda () (interactive) (quote-by-tag "p")) )
+(key-chord-define hkc-mode-map "\[\[" (lambda () (interactive) (quote-by-tag "p")) )
 (key-chord-define hkc-mode-map "bq" (lambda () (interactive) (quote-by-tag "blockquote")) )
 
 
